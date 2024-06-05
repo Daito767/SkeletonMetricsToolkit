@@ -6,5 +6,9 @@ Created on May 2024
 """
 
 
-if __name__ != '__main__':
-    exit()
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

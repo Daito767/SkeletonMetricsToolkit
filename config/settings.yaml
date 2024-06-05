@@ -1,0 +1,13 @@
+window:
+  title: "Skeleton Metrics Toolkit"
+  width: 800
+  height: 600
+
+plot:
+  default_color: "blue"
+  default_line_style: "-"
+  background_color: "white"
+
+data:
+  input_directory: "./data/input"
+  output_directory: "./data/output"
