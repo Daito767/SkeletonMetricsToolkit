@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Log files
+logs
+*.log
+
+# Static files
+staticfiles/
+
+# Temporary files
+*.tmp
+*.temp
