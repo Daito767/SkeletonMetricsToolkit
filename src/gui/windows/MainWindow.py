@@ -1,4 +1,9 @@
-import time
+# -*- coding: utf-8 -*-
+"""
+Created on June 2024
+
+@author: Ghimciuc Ioan
+"""
 
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMainWindow, QTextEdit, QToolBar
