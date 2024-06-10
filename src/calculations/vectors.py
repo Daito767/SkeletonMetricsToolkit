@@ -6,7 +6,7 @@ Created on June 2024
 """
 
 import numpy as np
-from ViconNexus import Marker
+from vicon_nexus import Marker
 
 
 class VectorOperations:
