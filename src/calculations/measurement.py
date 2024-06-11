@@ -19,7 +19,10 @@ class Operation:
 
     def execute(self, storage: dict[str, any]) -> None:
         try:
-            kwargs = {param: storage[param] for param in self.inputs_name}
+            # Creează un dicționar de argumente pe baza inputs_name și function_params
+            kwargs = {param: storage[input_name] for param, input_name in zip(self.function_params, self.inputs_name)}
+
+            # Apelează funcția cu argumentele extrase și stochează rezultatul
             storage[self.result_name] = self.function(**kwargs)
         except KeyError as e:
             self.errors.append(f"Missing parameter in storage: {e}")
