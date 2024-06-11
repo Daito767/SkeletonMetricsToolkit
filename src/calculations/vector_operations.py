@@ -4,9 +4,8 @@ Created on June 2024
 
 @author: Ghimciuc Ioan
 """
-
+from calculations.vicon_nexus import Marker
 import numpy as np
-from vicon_nexus import Marker
 
 
 def unit_vector(vector: np.ndarray) -> np.ndarray:
