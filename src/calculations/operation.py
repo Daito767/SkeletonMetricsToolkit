@@ -33,7 +33,7 @@ class Operation:
         return f"{self.name}({', '.join(self.function_params)})"
 
 
-class MeasurementManager:
+class OperationManager:
     def __init__(self):
         self.functions_module = importlib.import_module('calculations.vector_operations')
         self.available_functions: dict[str, FunctionType] = self.get_available_operations()
