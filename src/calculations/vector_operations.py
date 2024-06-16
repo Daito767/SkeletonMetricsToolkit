@@ -8,17 +8,16 @@ from calculations.vicon_nexus import Marker
 import numpy as np
 
 
-def calculate_angles(vectors1: np.ndarray, vectors2: np.ndarray, in_degrees: bool = True) -> np.ndarray:
+def calculate_angles(vectors1: np.ndarray, vectors2: np.ndarray) -> np.ndarray:
     """
-    Returnează unghiurile dintre vectorii corespunzători din două liste de vectori.
+    Returnează unghiurile în radiani dintre vectorii corespunzători din două liste de vectori.
 
     Parameters:
     vectors1 (np.ndarray): Prima listă de vectori.
     vectors2 (np.ndarray): A doua listă de vectori.
-    in_degrees (bool): Dacă True, unghiurile sunt returnate în grade, altfel în radiani. În mod implicit este True.
 
     Returns:
-    np.ndarray: Lista cu unghiurile dintre vectorii corespunzători.
+    np.ndarray: Lista cu unghiurile în radiani dintre vectorii corespunzători.
     """
     vectors1 = np.array(vectors1)
     vectors2 = np.array(vectors2)
@@ -33,10 +32,20 @@ def calculate_angles(vectors1: np.ndarray, vectors2: np.ndarray, in_degrees: boo
 
     angles = np.arccos(cos_angles)  # Calculate angles in radians
 
-    if in_degrees:
-        angles = np.degrees(angles)  # Convert to degrees if needed
-
     return angles
+
+
+def radians_to_degrees(angles: np.ndarray) -> np.ndarray:
+    """
+        Returnează unghiurile în grade.
+
+        Parameters:
+        angles (np.ndarray): Lista cu unghiurile în radiani.
+
+        Returns:
+        np.ndarray: Lista cu unghiurile în grade.
+        """
+    return np.degrees(angles)
 
 
 def add_vectors(vectors1: np.ndarray, vectors2: np.ndarray) -> np.ndarray:
