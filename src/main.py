@@ -23,7 +23,7 @@ def main():
     logger = logging.getLogger('my_app')
     logger.info("Application started")
 
-    nexus_api = ViconNexusAPI()
+    nexus_api = ViconNexusAPI('192.168.210.3')
     subject_names: list[str] = nexus_api.GetSubjectNames()
     markers: dict[str, Marker] = nexus_api.GetMarkers(subject_names[0])
     app = QApplication(sys.argv)
