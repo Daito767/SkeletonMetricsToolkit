@@ -29,8 +29,13 @@ class SubjectSelection(QWidget):
         self.button_next: QPushButton = QPushButton("Select subject", self)
 
         self.build()
+        self.setup_ui()
 
     def build(self):
+        self.subjects_list.addItems(self.nexus_api.GetSubjectNames())
+        self.button_next.clicked.connect(self.select_subject)
+
+    def setup_ui(self):
         self.label.setFont(QFont('Arial', 16))
         self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
@@ -41,8 +46,6 @@ class SubjectSelection(QWidget):
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
-        # self.subjects_list.addItems(["Vasiliy Anatolyevich", "Alexei Shapochnik", "Dimitrii Strelybov"])
-        self.subjects_list.addItems(self.nexus_api.GetSubjectNames())
 
         self.button_next.setFont(QFont('Arial', 11))
         self.button_next.setStyleSheet("""
@@ -51,12 +54,12 @@ class SubjectSelection(QWidget):
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
-        self.button_next.clicked.connect(self.select_subject)
 
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.subjects_list)
         self.layout.addWidget(self.button_next)
         self.setLayout(self.layout)
+
 
     def select_subject(self):
         if len(self.subjects_list.selectedItems()) > 0:

@@ -57,8 +57,12 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         self.build()
+        self.setup_ui()
 
     def build(self):
+        pass
+
+    def setup_ui(self):
         self.setWindowTitle(self.config['window']['title'])
         self.setGeometry(100, 100, self.config['window']['width'], self.config['window']['height'])
 

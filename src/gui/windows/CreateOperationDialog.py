@@ -33,8 +33,12 @@ class CreateOperationDialog(QDialog):
         self.line_edit: QLineEdit = QLineEdit(self)
 
         self.build()
+        self.setup_ui()
 
     def build(self):
+        pass
+
+    def setup_ui(self):
         self.setWindowTitle("Create Operation")
 
         self.label.setFont(QFont('Arial', 14))

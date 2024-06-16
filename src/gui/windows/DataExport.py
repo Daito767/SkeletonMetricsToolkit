@@ -30,13 +30,17 @@ class DataExport(QWidget):
         self.button_next: QPushButton = QPushButton("Export", self)
 
         self.build()
+        self.setup_ui()
 
     def build(self):
+        self.export_list.addItems(["PDF", "EXCEL", "CSV"])
+        self.button_next.clicked.connect(self.next_widget)
+
+    def setup_ui(self):
         self.label.setFont(QFont('Arial', 16))
         self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.layout.addWidget(self.label)
         self.export_list.setFont(QFont('Arial', 12))
-        self.export_list.addItems(["PDF", "EXCEL", "CSV"])
         self.export_list.setStyleSheet("""
                             QListWidget {
                                 margin: 10px 100px 10px 100px ;   /* Margin around the button */
@@ -51,7 +55,6 @@ class DataExport(QWidget):
                                 padding: 10px;  /* Padding inside the button */
                             }
                         """)
-        self.button_next.clicked.connect(self.next_widget)
         self.layout.addWidget(self.button_next)
         self.setLayout(self.layout)
 

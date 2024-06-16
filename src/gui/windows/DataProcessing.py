@@ -52,8 +52,14 @@ class DataProcessing(QWidget):
         self.button_next: QPushButton = QPushButton("Next", self)
 
         self.build()
+        self.setup_ui()
 
     def build(self):
+        self.variables_list.addItems(["leg", "arm", "torso", "head"])
+        self.operations_list.addItems(["fix", "change", "heal", "repair"])
+        self.button_next.clicked.connect(self.next_widget)
+
+    def setup_ui(self):
         self.label.setFont(QFont('Arial', 16))
         self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.layout.addWidget(self.label)
@@ -70,7 +76,6 @@ class DataProcessing(QWidget):
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
-        self.variables_list.addItems(["leg", "arm", "torso", "head"])
         self.column_1_layout.addWidget(self.variables_list)
 
         self.column_2_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
@@ -94,7 +99,6 @@ class DataProcessing(QWidget):
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
-        self.operations_list.addItems(["fix", "change", "heal", "repair"])
         self.column_2_layout.addWidget(self.operations_list)
 
         self.column_layout.addLayout(self.column_1_layout)
@@ -108,9 +112,7 @@ class DataProcessing(QWidget):
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
-        self.button_next.clicked.connect(self.next_widget)
         self.layout.addWidget(self.button_next)
-
         self.setLayout(self.layout)
 
     def show_dialog(self):
