@@ -11,7 +11,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QListWi
 import logging
 import gui.windows.CreateOperationDialog as Dialogs
 from calculations.operation import OperationManager
-from calculations.vicon_nexus import ViconNexusAPI
+from calculations.vicon_nexus import ViconNexusAPI, Marker
 
 
 class DataProcessing(QWidget):
@@ -52,10 +52,10 @@ class DataProcessing(QWidget):
 
     def build(self):
         start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
-        markers: dict[str, Marker] = self.nexus_api.GetMarkers()
+        markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
 
-        for marker in markers:
-            self.operation_manager.storage[ma]
+        for marker in markers.values():
+            self.operation_manager.storage[marker.name] = marker
 
         self.label.setFont(QFont('Arial', 16))
         self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
