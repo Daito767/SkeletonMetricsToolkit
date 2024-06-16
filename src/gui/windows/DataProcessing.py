@@ -46,7 +46,7 @@ class DataProcessing(QWidget):
         self.column_2_layout: QVBoxLayout = QVBoxLayout()
         self.right_row_layout: QHBoxLayout = QHBoxLayout()
         self.column_2_label: QLabel = QLabel("Operations")
-        self.right_button: QPushButton = QPushButton("+")   # TODO: rename
+        self.button_add_operation: QPushButton = QPushButton("+")
         self.operations_list: QListWidget = QListWidget()
 
         self.dialog_create_operation = Dialogs.CreateOperationDialog(self, self.logger, self.operation_manager)
@@ -59,7 +59,7 @@ class DataProcessing(QWidget):
     def build(self):
         # self.variables_list.addItems(["leg", "arm", "torso", "head"])
         self.operations_list.addItems(["fix", "change", "heal", "repair"])
-        self.right_button.clicked.connect(self.show_dialog)
+        self.button_add_operation.clicked.connect(self.show_dialog)
         self.button_next.clicked.connect(self.next_widget)
 
         self.markers_changed.connect(self.dialog_create_operation.update_markers)
@@ -86,14 +86,14 @@ class DataProcessing(QWidget):
         self.column_2_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.column_2_label.setFont(QFont('Arial', 11))
         self.right_row_layout.addWidget(self.column_2_label)
-        self.right_button.setFont(QFont('Arial', 20))
-        self.right_button.setStyleSheet("""
+        self.button_add_operation.setFont(QFont('Arial', 20))
+        self.button_add_operation.setStyleSheet("""
                             QPushButton {
                                 margin: 0px 50px 0px 100px ;   /* Margin around the button */
                                 padding: 2px;  /* Padding inside the button */
                             }
                         """)
-        self.right_row_layout.addWidget(self.right_button)
+        self.right_row_layout.addWidget(self.button_add_operation)
         self.column_2_layout.addLayout(self.right_row_layout)
 
         self.operations_list.setFont(QFont('Arial', 12))
