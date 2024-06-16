@@ -47,7 +47,7 @@ class DataProcessing(QWidget):
         self.right_button: QPushButton = QPushButton("+")
         self.operations_list: QListWidget = QListWidget()
 
-        self.right_create_operation: QDialog = Dialogs.CreateOperationDialog(self, self.logger)
+        self.right_create_operation: QDialog = Dialogs.CreateOperationDialog(self, self.logger, self.operation_manager)
 
         self.button_next: QPushButton = QPushButton("Next", self)
 
@@ -55,7 +55,7 @@ class DataProcessing(QWidget):
         self.setup_ui()
 
     def build(self):
-        self.variables_list.addItems(["leg", "arm", "torso", "head"])
+        # self.variables_list.addItems(["leg", "arm", "torso", "head"])
         self.operations_list.addItems(["fix", "change", "heal", "repair"])
         self.button_next.clicked.connect(self.next_widget)
 
@@ -118,13 +118,17 @@ class DataProcessing(QWidget):
     def show_dialog(self):
         self.right_create_operation.show()
 
+    def update_variables(self):
+        start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
+        markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
+
+        for marker in markers.values():
+            self.operation_manager.storage[marker.name] = marker.trajectory
+            self.variables_list.addItem(f"{marker.name}")
+
     @Slot(str)
     def update_subject(self, subject_name: str):
         self.label.setText(f"{subject_name}: Data Processing")
         self.subject_name = subject_name
 
-        start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
-        markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
-
-        for marker in markers.values():
-            self.operation_manager.storage[marker.name] = marker
+        self.update_variables()
