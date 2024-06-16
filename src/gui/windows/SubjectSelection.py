@@ -4,20 +4,24 @@ Created on June 2024
 
 @author: Ghimciuc Mihail
 """
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QListWidget, QPushButton
+from calculations.vicon_nexus import ViconNexusAPI
 import logging
 
 
 class SubjectSelection(QWidget):
-    def __init__(self, main_window: QMainWindow, logger: logging.Logger, next_widget: callable, parent=None):
+    subject_changed = Signal(str)
+
+    def __init__(self, main_window: QMainWindow, logger: logging.Logger, next_widget: callable, nexus_api: ViconNexusAPI, parent=None):
         super().__init__(parent)  # Initialize QWidget
         self.logger: logging.Logger = logger
         self.main_window: QMainWindow = main_window
         self.next_widget: function = next_widget
         self.subject_name: str = "N/A"
-        self.update_callbacks: list[callable] = []
+
+        self.nexus_api: ViconNexusAPI = nexus_api
 
         self.layout: QVBoxLayout = QVBoxLayout()
         self.label: QLabel = QLabel("Select Subject")
@@ -37,7 +41,8 @@ class SubjectSelection(QWidget):
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
-        self.subjects_list.addItems(["Vasiliy Anatolyevich", "Alexei Shapochnik", "Dimitrii Strelybov"])
+        # self.subjects_list.addItems(["Vasiliy Anatolyevich", "Alexei Shapochnik", "Dimitrii Strelybov"])
+        self.subjects_list.addItems(self.nexus_api.GetSubjectNames())
 
         self.button_next.setFont(QFont('Arial', 11))
         self.button_next.setStyleSheet("""
@@ -56,15 +61,11 @@ class SubjectSelection(QWidget):
     def select_subject(self):
         if len(self.subjects_list.selectedItems()) > 0:
             self.subject_name = self.subjects_list.selectedItems()[0].text()
-            self.call_update_callbacks()
-            self.main_window.statusBar().showMessage(f'Subject: {self.subject_name}', 3000)
+            self.on_subject_change()
             self.next_widget()
         else:
             self.main_window.statusBar().showMessage('Select a subject!', 3000)
 
-    def connect_update_callbacks(self, callback: list[callable]):
-        self.update_callbacks.extend(callback)
-
-    def call_update_callbacks(self):
-        for callback in self.update_callbacks:
-            callback(self.subject_name)
+    @Slot(str)
+    def on_subject_change(self):
+        self.subject_changed.emit(self.subject_name)

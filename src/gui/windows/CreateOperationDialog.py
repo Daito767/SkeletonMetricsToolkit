@@ -15,9 +15,12 @@ import logging
 
 class CreateOperationDialog(QDialog):
     def __init__(self, parent_widget: QWidget, logger: logging.Logger, parent=None):
-        super().__init__(parent)  # Initialize QWidget
-        self.parent_widget: QWidget = parent_widget
         self.logger: logging.Logger = logger
+        self.logger.info("Initializing CreateOperation Dialog")
+
+        super().__init__(parent)  # Initialize QDialog
+
+        self.parent_widget: QWidget = parent_widget
 
         self.layout: QVBoxLayout = QVBoxLayout()
         self.row_dropdown: QHBoxLayout = QHBoxLayout()

@@ -5,7 +5,7 @@ Created on June 2024
 @author: Ghimciuc Mihail
 """
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QListWidget, QPushButton
 import logging
@@ -14,8 +14,11 @@ import logging
 class DataExport(QWidget):
     def __init__(self, main_window: QMainWindow, logger: logging.Logger, previous_widget: callable,
                  next_widget: callable, parent=None):
-        super().__init__(parent)  # Initialize QWidget
         self.logger: logging.Logger = logger
+        self.logger.info("Initializing DataExport")
+
+        super().__init__(parent)  # Initialize QWidget
+
         self.main_window: QMainWindow = main_window
         self.previous_widget: callable = previous_widget
         self.next_widget: callable = next_widget
@@ -52,6 +55,7 @@ class DataExport(QWidget):
         self.layout.addWidget(self.button_next)
         self.setLayout(self.layout)
 
+    @Slot(str)
     def update_subject(self, subject_name: str):
         self.label.setText(f"{subject_name}: Data Export")
         self.subject_name = subject_name

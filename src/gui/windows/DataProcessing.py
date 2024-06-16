@@ -4,23 +4,31 @@ Created on June 2024
 
 @author: Ghimciuc Mihail
 """
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QListWidget, QPushButton, QHBoxLayout, \
     QAbstractItemView, QMessageBox, QDialog
 import logging
 import gui.windows.CreateOperationDialog as Dialogs
+from calculations.operation import OperationManager
+from calculations.vicon_nexus import ViconNexusAPI
 
 
 class DataProcessing(QWidget):
     def __init__(self, main_window: QMainWindow, logger: logging.Logger, previous_widget: callable,
-                 next_widget: callable, parent=None):
-        super().__init__(parent)  # Initialize QWidget
+                 next_widget: callable, nexus_api: ViconNexusAPI, operation_manager: OperationManager, parent=None):
         self.logger: logging.Logger = logger
+        self.logger.info("Initializing DataProcessing")
+
+        super().__init__(parent)  # Initialize QWidget
+
         self.main_window: QMainWindow = main_window
         self.previous_widget: callable = previous_widget
         self.next_widget: callable = next_widget
         self.subject_name: str = ""
+
+        self.nexus_api: ViconNexusAPI = nexus_api
+        self.operation_manager: OperationManager = operation_manager
 
         self.layout: QVBoxLayout = QVBoxLayout()
         self.label: QLabel = QLabel("Data Processing")
@@ -43,6 +51,12 @@ class DataProcessing(QWidget):
         self.build()
 
     def build(self):
+        start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
+        markers: dict[str, Marker] = self.nexus_api.GetMarkers()
+
+        for marker in markers:
+            self.operation_manager.storage[ma]
+
         self.label.setFont(QFont('Arial', 16))
         self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.layout.addWidget(self.label)
@@ -105,6 +119,7 @@ class DataProcessing(QWidget):
     def show_dialog(self):
         self.right_create_operation.show()
 
+    @Slot(str)
     def update_subject(self, subject_name: str):
         self.label.setText(f"{subject_name}: Data Processing")
         self.subject_name = subject_name
