@@ -27,6 +27,9 @@ class DataProcessing(QWidget):
         self.next_widget: callable = next_widget
         self.subject_name: str = ""
 
+        self.start_frame, self.end_frame = 0, 0
+        self.markers: list[Marker] = []
+
         self.nexus_api: ViconNexusAPI = nexus_api
         self.operation_manager: OperationManager = operation_manager
 
@@ -51,12 +54,6 @@ class DataProcessing(QWidget):
         self.build()
 
     def build(self):
-        start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
-        markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
-
-        for marker in markers.values():
-            self.operation_manager.storage[marker.name] = marker
-
         self.label.setFont(QFont('Arial', 16))
         self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.layout.addWidget(self.label)
@@ -123,3 +120,9 @@ class DataProcessing(QWidget):
     def update_subject(self, subject_name: str):
         self.label.setText(f"{subject_name}: Data Processing")
         self.subject_name = subject_name
+
+        start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
+        markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
+
+        for marker in markers.values():
+            self.operation_manager.storage[marker.name] = marker
