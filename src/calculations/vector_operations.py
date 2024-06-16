@@ -8,90 +8,159 @@ from calculations.vicon_nexus import Marker
 import numpy as np
 
 
-def unit_vector(vector: np.ndarray) -> np.ndarray:
-    return vector / np.linalg.norm(vector)
+def calculate_angles(vectors1: np.ndarray, vectors2: np.ndarray, in_degrees: bool = True) -> np.ndarray:
+    """
+    Returnează unghiurile dintre vectorii corespunzători din două liste de vectori.
+
+    Parameters:
+    vectors1 (np.ndarray): Prima listă de vectori.
+    vectors2 (np.ndarray): A doua listă de vectori.
+    in_degrees (bool): Dacă True, unghiurile sunt returnate în grade, altfel în radiani. În mod implicit este True.
+
+    Returns:
+    np.ndarray: Lista cu unghiurile dintre vectorii corespunzători.
+    """
+    vectors1 = np.array(vectors1)
+    vectors2 = np.array(vectors2)
+
+    dot_products = np.einsum('ij,ij->i', vectors1, vectors2)  # Calculate dot products
+
+    norms_a = np.linalg.norm(vectors1, axis=1)  # Calculate norms of vectors_a
+    norms_b = np.linalg.norm(vectors2, axis=1)  # Calculate norms of vectors_b
+
+    cos_angles = dot_products / (norms_a * norms_b)  # Calculate cosines of angles
+    cos_angles = np.clip(cos_angles, -1.0, 1.0)  # Clip values to avoid numerical errors
+
+    angles = np.arccos(cos_angles)  # Calculate angles in radians
+
+    if in_degrees:
+        angles = np.degrees(angles)  # Convert to degrees if needed
+
+    return angles
 
 
-def get_angle_between_vectors(vector1: np.ndarray, vector2: np.ndarray) -> float:
-    unit_vector1 = unit_vector(vector1)
-    unit_vector2 = unit_vector(vector2)
-    return np.arccos(np.dot(unit_vector1, unit_vector2))
+def add_vectors(vectors1: np.ndarray, vectors2: np.ndarray) -> np.ndarray:
+    """
+    Returnează suma a două liste de vectori.
+
+    Parameters:
+    vectors1 (np.ndarray): Prima listă de vectori.
+    vectors2 (np.ndarray): A doua listă de vectori.
+
+    Returns:
+    np.ndarray: Lista cu sumele vectorilor corespunzători.
+    """
+    return vectors1 + vectors2
 
 
-def get_all_angles_between_vectors(vectors1: np.ndarray, vectors2: np.ndarray) -> list[float]:
-    angles_between_vectors: list[float] = []
+def subtract_vectors(vectors1: np.ndarray, vectors2: np.ndarray) -> np.ndarray:
+    """
+    Returnează diferența dintre două arrays de vectori.
 
-    for vector1, vector2 in zip(vectors1, vectors2):
-        angle = get_angle_between_vectors(vector1, vector2)
-        angle = (360 * angle) / (2 * np.pi)
-        angles_between_vectors.append(angle)
+    Parameters:
+    vectors1 (np.ndarray): Prima listă de vectori.
+    vectors2 (np.ndarray): A doua listă de vectori.
 
-    return angles_between_vectors
-
-
-def normal_vector_of_plane(point1: np.ndarray, point2: np.ndarray, point3: np.ndarray) -> np.ndarray:
-    # Vectori directori ai planului
-    vec1 = point2 - point1
-    vec2 = point3 - point1
-    normal_vector = np.cross(vec1, vec2)
-    return normal_vector
+    Returns:
+    np.ndarray: Lista cu diferențele vectorilor corespunzători. (vectors1 - vectors2)
+    """
+    return vectors1 - vectors2
 
 
-def project_vector_onto_vector(vector: np.ndarray, onto: np.ndarray) -> np.ndarray:
-    onto_unit = unit_vector(onto)
-    projection = np.dot(vector, onto_unit) * onto_unit
-    return projection
+def dot_product_vectors(vectors1: np.ndarray, vectors2: np.ndarray) -> np.ndarray:
+    """
+    Returnează produsul scalar al vectorilor corespunzători din două arrays.
+
+    Parameters:
+    vectors1 (np.ndarray): Prima listă de vectori.
+    vectors2 (np.ndarray): A doua listă de vectori.
+
+    Returns:
+    np.ndarray: Lista cu produsele scalare ale vectorilor corespunzători.
+    """
+    return np.einsum('ij,ij->i', vectors1, vectors2)
 
 
-def project_vector_onto_plane(vector: np.ndarray, normal: np.ndarray) -> np.ndarray:
-    normal_unit = unit_vector(normal)
-    projection = vector - np.dot(vector, normal_unit) * normal_unit
-    return projection
+def norms_of_vectors(vectors: np.ndarray) -> np.ndarray:
+    """
+    Returnează normele (mărimile) vectorilor dintr-un array de vectori.
+
+    Parameters:
+    vectors (np.ndarray): Lista de vectori.
+
+    Returns:
+    np.ndarray: Lista cu normele vectorilor.
+    """
+    return np.linalg.norm(vectors, axis=1)
 
 
-def distance_between_points(point1: np.ndarray, point2: np.ndarray) -> float:
-    return np.linalg.norm(point1 - point2)
+def cross_product_vectors(vectors1: np.ndarray, vectors2: np.ndarray) -> np.ndarray:
+    """
+    Returnează produsul vectorial al vectorilor corespunzători din două arrays.
+
+    Parameters:
+    vectors1 (np.ndarray): Prima listă de vectori.
+    vectors2 (np.ndarray): A doua listă de vectori.
+
+    Returns:
+    np.ndarray: Lista cu produsele vectoriale ale vectorilor corespunzători.
+    """
+    return np.cross(vectors1, vectors2)
 
 
-def is_point_in_plane(point: np.ndarray, point_on_plane: np.ndarray, normal: np.ndarray) -> bool:
-    # Vector de la punctul pe plan la punctul dat
-    vec = point - point_on_plane
+def unit_vectors(vectors: np.ndarray) -> np.ndarray:
+    """
+    Returnează vectorii unitarizați pentru un array de vectori.
 
-    # Produsul scalar ar trebui să fie zero dacă punctul este în plan
-    return np.isclose(np.dot(vec, normal), 0)
+    Parameters:
+    vectors (np.ndarray): Lista de vectori.
+
+    Returns:
+    np.ndarray: Lista cu vectorii unitarizați.
+    """
+    normal_vectors = np.linalg.norm(vectors, axis=1, keepdims=True)  # Calculate norms of vectors
+    normal_vectors[normal_vectors == 0] = 1  # Avoid zero division
+    return vectors / normal_vectors  # Normalize vectors
 
 
 # Exemplu de utilizare
 if __name__ == "__main__":
-
     # Vectori pentru testare
     v1 = np.array([1, 0, 0])
     v2 = np.array([0, 1, 0])
 
-    angle = get_angle_between_vectors(v1, v2)
+    angle = calculate_angles(v1, v2)
     print(f"Unghiul dintre vectori: {angle} radiani")
 
-    # Puncte pentru definirea unui plan
-    p1 = np.array([0, 0, 0])
-    p2 = np.array([1, 0, 0])
-    p3 = np.array([0, 1, 0])
+    vectors_a = np.array([[1, 0, 0], [1, 1, 0], [0, 1, 0]])
+    vectors_b = np.array([[0, 1, 0], [1, 0, 1], [1, 0, 0]])
 
-    normal = normal_vector_of_plane(p1, p2, p3)
-    print(f"Vectorul normal al planului: {normal}")
+    # Adunare
+    added_vectors = add_vectors(vectors_a, vectors_b)
+    print("Adunare:")
+    print(added_vectors)
 
-    # Proiecția unui vector pe alt vector
-    vector = np.array([2, 3, 4])
-    onto = np.array([1, 0, 0])
+    # Scădere
+    subtracted_vectors = subtract_vectors(vectors_a, vectors_b)
+    print("Scădere:")
+    print(subtracted_vectors)
 
-    projection_vector = project_vector_onto_vector(vector, onto)
-    print(f"Proiecția vectorului {vector} pe vectorul {onto}: {projection_vector}")
+    # Produsul Scalar
+    dot_products = dot_product_vectors(vectors_a, vectors_b)
+    print("Produsul Scalar:")
+    print(dot_products)
 
-    # Proiecția unui vector pe un plan
-    normal = np.array([0, 0, 1])
-    projection_plane = project_vector_onto_plane(vector, normal)
-    print(f"Proiecția vectorului {vector} pe planul cu normalul {normal}: {projection_plane}")
+    # Normele Vectoarelor
+    norms = norms_of_vectors(vectors_a)
+    print("Normele Vectoarelor:")
+    print(norms)
 
-    # Verificarea dacă un punct este în plan
-    point = np.array([1, 1, 0])
-    point_in_plane = is_point_in_plane(point, p1, normal)
-    print(f"Punctul {point} este în plan: {point_in_plane}")
+    # Produsul Vectorial
+    cross_products = cross_product_vectors(vectors_a, vectors_b)
+    print("Produsul Vectorial:")
+    print(cross_products)
+
+    # Vectori Unitarizati
+    unit_vectors_a = unit_vectors(vectors_a)
+    print("Vectori Unitarizati:")
+    print(unit_vectors_a)
