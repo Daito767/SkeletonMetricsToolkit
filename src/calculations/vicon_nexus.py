@@ -22,8 +22,8 @@ class Marker:
 
 
 class ViconNexusAPI(ViconNexus.ViconNexus):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, host='localhost'):
+        super().__init__(host)
 
     def GetMarkers(self, subject_name: str) -> dict[str, Marker]:
         start_frame, end_frame = self.GetTrialRegionOfInterest()
