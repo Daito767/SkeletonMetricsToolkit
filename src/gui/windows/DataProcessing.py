@@ -72,7 +72,7 @@ class DataProcessing(QWidget):
                                 padding: 2px;  /* Padding inside the button */
                             }
                         """)
-        self.right_button.clicked.connect(self.show_dialog)     # TODO: Add function
+        self.right_button.clicked.connect(self.show_dialog)
         self.right_row_layout.addWidget(self.right_button)
         self.column_2_layout.addLayout(self.right_row_layout)
 
