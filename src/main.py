@@ -10,6 +10,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
+from calculations.operation import Operation
 from config import load_config, setup_logging
 from gui.windows.MainWindow import MainWindow
 from calculations.vicon_nexus import ViconNexusAPI, Marker
@@ -25,10 +26,9 @@ def main():
     nexus_api = ViconNexusAPI()
     subject_names: list[str] = nexus_api.GetSubjectNames()
     markers: dict[str, Marker] = nexus_api.GetMarkers(subject_names[0])
-
     app = QApplication(sys.argv)
 
-    main_window = MainWindow(logger, config)
+    main_window = MainWindow(logger, config, nexus_api)
     main_window.show()
 
     code: int = app.exec()
