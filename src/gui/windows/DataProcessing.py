@@ -15,6 +15,8 @@ from calculations.vicon_nexus import ViconNexusAPI, Marker
 
 
 class DataProcessing(QWidget):
+    markers_changed = Signal('QVariant')
+
     def __init__(self, main_window: QMainWindow, logger: logging.Logger, previous_widget: callable,
                  next_widget: callable, nexus_api: ViconNexusAPI, operation_manager: OperationManager, parent=None):
         self.logger: logging.Logger = logger
@@ -28,7 +30,7 @@ class DataProcessing(QWidget):
         self.subject_name: str = ""
 
         self.start_frame, self.end_frame = 0, 0
-        self.markers: list[Marker] = []
+        self.markers: dict[str, Marker] = {}
 
         self.nexus_api: ViconNexusAPI = nexus_api
         self.operation_manager: OperationManager = operation_manager
@@ -44,10 +46,10 @@ class DataProcessing(QWidget):
         self.column_2_layout: QVBoxLayout = QVBoxLayout()
         self.right_row_layout: QHBoxLayout = QHBoxLayout()
         self.column_2_label: QLabel = QLabel("Operations")
-        self.right_button: QPushButton = QPushButton("+")
+        self.right_button: QPushButton = QPushButton("+")   # TODO: rename
         self.operations_list: QListWidget = QListWidget()
 
-        self.right_create_operation: QDialog = Dialogs.CreateOperationDialog(self, self.logger, self.operation_manager)
+        self.dialog_create_operation = Dialogs.CreateOperationDialog(self, self.logger, self.operation_manager)
 
         self.button_next: QPushButton = QPushButton("Next", self)
 
@@ -57,7 +59,10 @@ class DataProcessing(QWidget):
     def build(self):
         # self.variables_list.addItems(["leg", "arm", "torso", "head"])
         self.operations_list.addItems(["fix", "change", "heal", "repair"])
+        self.right_button.clicked.connect(self.show_dialog)
         self.button_next.clicked.connect(self.next_widget)
+
+        self.markers_changed.connect(self.dialog_create_operation.update_markers)
 
     def setup_ui(self):
         self.label.setFont(QFont('Arial', 16))
@@ -88,7 +93,6 @@ class DataProcessing(QWidget):
                                 padding: 2px;  /* Padding inside the button */
                             }
                         """)
-        self.right_button.clicked.connect(self.show_dialog)
         self.right_row_layout.addWidget(self.right_button)
         self.column_2_layout.addLayout(self.right_row_layout)
 
@@ -116,15 +120,23 @@ class DataProcessing(QWidget):
         self.setLayout(self.layout)
 
     def show_dialog(self):
-        self.right_create_operation.show()
+        self.dialog_create_operation.show()
 
     def update_variables(self):
         start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
-        markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
+        self.markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
+        self.on_markers_changed()
 
-        for marker in markers.values():
+        for marker in self.markers.values():
             self.operation_manager.storage[marker.name] = marker.trajectory
             self.variables_list.addItem(f"{marker.name}")
+
+    def get_markers(self) -> dict[str, Marker]:
+        return self.markers
+
+    @Slot('QVariant')
+    def on_markers_changed(self):
+        self.markers_changed.emit(self.markers)
 
     @Slot(str)
     def update_subject(self, subject_name: str):
