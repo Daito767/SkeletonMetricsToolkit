@@ -141,7 +141,8 @@ class CreateOperationDialog(QDialog):
             row_layout: QHBoxLayout = QHBoxLayout()
             label: QLabel = QLabel(f"{param}:")
             dropdown: QComboBox = QComboBox()
-            dropdown.addItems(self.markers)
+            for value in self.operation_manager.storage.keys():
+                dropdown.addItem(value)
             row_layout.addWidget(label)
             row_layout.addWidget(dropdown)
             self.parameter_dropdowns.append(dropdown)
