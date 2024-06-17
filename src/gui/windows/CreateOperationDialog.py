@@ -150,7 +150,7 @@ class CreateOperationDialog(QDialog):
     def create_operation(self) -> Operation | None:
         result_name: str = self.line_edit_result_name.text()
         params: list[str] = [x.currentText() for x in self.parameter_dropdowns]
-        if result_name not in self.markers:
+        if result_name != "":
             operation: Operation = Operation(self.operation_function, result_name, params)
             return operation
         return None
