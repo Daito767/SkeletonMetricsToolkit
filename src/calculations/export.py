@@ -19,7 +19,7 @@ class ExportManager:
     def export_excel(self, storage: dict[str, any], data_to_export: list[str], file_path: str):
         try:
             # Filtrare date pentru variabilele specificate
-            filtered_storage = {key: storage[key] for key in variable_names if key in storage}
+            filtered_storage = {key: storage[key] for key in data_to_export if key in storage}
 
             # Transformarea datelor într-un format corespunzător pentru Excel
             for key, value in filtered_storage.items():
