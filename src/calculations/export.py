@@ -16,7 +16,7 @@ class ExportManager:
         self.logger = logger
         self.logger.info("Initializing ExportManager")
 
-    def export_to_excel(self, storage: dict[str, any], data_to_export: list[str], file_path: str):
+    def export_excel(self, storage: dict[str, any], data_to_export: list[str], file_path: str):
         try:
             # Filtrare date pentru variabilele specificate
             filtered_storage = {key: storage[key] for key in data_to_export if key in storage}
@@ -26,7 +26,7 @@ class ExportManager:
         except Exception as e:
             self.logger.error(f"Failed to export data to Excel: {e}")
 
-    def export_plot_variable(self, storage: dict[str, any], data_to_export: list[str], file_path: str):
+    def export_plot(self, storage: dict[str, any], data_to_export: list[str], file_path: str):
         try:
             with PdfPages(file_path) as pdf:
                 for variable_name in data_to_export:
@@ -59,5 +59,5 @@ if __name__ == "__main__":
     }
     variable_names = ['variable1', 'variable2']
 
-    export_manager.export_to_excel(storage, variable_names, 'data.xlsx')
-    export_manager.export_plot_variable(storage, variable_names, 'plots.pdf')
+    export_manager.export_excel(storage, variable_names, 'data.xlsx')
+    export_manager.export_plot(storage, variable_names, 'plots.pdf')
