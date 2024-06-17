@@ -35,7 +35,7 @@ class Operation:
         return False
 
     def __str__(self):
-        return f"{self.name}({', '.join(self.function_params)})"
+        return f"{self.result_name} = {self.name}({', '.join(self.inputs_name)})"
 
 
 class OperationManager:
