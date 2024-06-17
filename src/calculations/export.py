@@ -4,7 +4,7 @@ Created on May 2024
 
 @author: Ghimciuc Ioan
 """
-
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -23,7 +23,7 @@ class ExportManager:
 
             # Transformarea datelor într-un format corespunzător pentru Excel
             for key, value in filtered_storage.items():
-                if isinstance(value, list) and all(isinstance(i, list) for i in value):
+                if isinstance(value, (list, np.ndarray)) and all(isinstance(i, list) for i in value):
                     # Dacă este o listă de liste, transformăm fiecare listă într-un șir de caractere
                     filtered_storage[key] = [', '.join(map(str, sublist)) for sublist in value]
 
