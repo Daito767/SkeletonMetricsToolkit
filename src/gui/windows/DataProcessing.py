@@ -57,12 +57,14 @@ class DataProcessing(QWidget):
         self.setup_ui()
 
     def build(self):
-        # self.variables_list.addItems(["leg", "arm", "torso", "head"])
-        self.operations_list.addItems(["fix", "change", "heal", "repair"])
         self.button_add_operation.clicked.connect(self.show_dialog)
         self.button_next.clicked.connect(self.next_widget)
 
         self.markers_changed.connect(self.dialog_create_operation.update_markers)
+        self.dialog_create_operation.operation_added.connect(self.refresh_list_elements)
+
+        self.update_variables()
+        self.update_operations()
 
     def setup_ui(self):
         self.label.setFont(QFont('Arial', 16))
@@ -77,7 +79,7 @@ class DataProcessing(QWidget):
         self.variables_list.setFont(QFont('Arial', 12))
         self.variables_list.setStyleSheet("""
                     QListWidget {
-                        margin: 10px 50px 10px 50px ;   /* Margin around the button */
+                        margin: 10px 20px 10px 20px ;   /* Margin around the button */
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
@@ -99,7 +101,7 @@ class DataProcessing(QWidget):
         self.operations_list.setFont(QFont('Arial', 12))
         self.operations_list.setStyleSheet("""
                     QListWidget {
-                        margin: 10px 50px 10px 50px ;   /* Margin around the button */
+                        margin: 10px 20px 10px 20px ;   /* Margin around the button */
                         padding: 10px;  /* Padding inside the button */
                     }
                 """)
@@ -123,16 +125,23 @@ class DataProcessing(QWidget):
         self.dialog_create_operation.show()
 
     def update_variables(self):
-        start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
-        self.markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
-        self.on_markers_changed()
+        self.variables_list.clear()
+        for value in self.operation_manager.storage.keys():
+            self.variables_list.addItem(value)
 
-        for marker in self.markers.values():
-            self.operation_manager.storage[marker.name] = marker.trajectory
-            self.variables_list.addItem(f"{marker.name}")
+    def update_operations(self):
+        for operation in self.operation_manager._operations:
+            self.operations_list.addItem(str(operation))
 
     def get_markers(self) -> dict[str, Marker]:
         return self.markers
+
+    @Slot()
+    def refresh_list_elements(self):
+        self.variables_list.clear()
+        self.operations_list.clear()
+        self.update_variables()
+        self.update_operations()
 
     @Slot('QVariant')
     def on_markers_changed(self):
@@ -143,4 +152,12 @@ class DataProcessing(QWidget):
         self.label.setText(f"{subject_name}: Data Processing")
         self.subject_name = subject_name
 
+        start_frame, end_frame = self.nexus_api.GetTrialRegionOfInterest()
+        self.markers: dict[str, Marker] = self.nexus_api.GetMarkers(self.subject_name)
+
+        for marker in self.markers.values():
+            self.operation_manager.storage[marker.name] = marker.trajectory
+
+        self.update_variables()
+        self.on_markers_changed()
         self.update_variables()
