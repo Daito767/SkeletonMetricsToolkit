@@ -35,7 +35,7 @@ class Operation:
         return False
 
     def __str__(self):
-        return f"{self.name}({', '.join(self.function_params)})"
+        return f"{self.result_name} = {self.name}({', '.join(self.inputs_name)})"
 
 
 class OperationManager:
@@ -59,6 +59,18 @@ class OperationManager:
     def add_operation(self, operation: Operation) -> None:
         self._operations.append(operation)
         self.logger.info(f"Operation added: {operation}")
+
+    def add_and_run_operation(self, operation: Operation) -> None:
+        self._operations.append(operation)
+        self.logger.info(f"Operation added: {operation}")
+
+        self.logger.info(f"Executing operation: {operation}")
+        operation.errors.clear()
+        success = operation.execute(self.storage)
+        if success:
+            self.logger.info(f"Operation successful: {operation}")
+        else:
+            self.logger.error(f"Operation failed: {operation}. Errors: {operation.errors}")
 
     def remove_operation(self, operation: Operation) -> None:
         if operation in self._operations:

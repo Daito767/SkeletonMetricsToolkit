@@ -4,6 +4,8 @@ Created on June 2024
 
 @author: Ghimciuc Mihail
 """
+from types import FunctionType
+
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QListWidget, QPushButton
@@ -18,7 +20,7 @@ class SubjectSelection(QWidget):
         super().__init__(parent)  # Initialize QWidget
         self.logger: logging.Logger = logger
         self.main_window: QMainWindow = main_window
-        self.next_widget: function = next_widget
+        self.next_widget: FunctionType = next_widget
         self.subject_name: str = "N/A"
 
         self.nexus_api: ViconNexusAPI = nexus_api
@@ -39,7 +41,7 @@ class SubjectSelection(QWidget):
         self.label.setFont(QFont('Arial', 16))
         self.label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
-        self.subjects_list.setFont(QFont('Arial', 12))
+        self.subjects_list.setFont(QFont('Arial', 18))
         self.subjects_list.setStyleSheet("""
                     QListWidget {
                         margin: 10px 50px 10px 50px ;   /* Margin around the button */
@@ -59,7 +61,6 @@ class SubjectSelection(QWidget):
         self.layout.addWidget(self.subjects_list)
         self.layout.addWidget(self.button_next)
         self.setLayout(self.layout)
-
 
     def select_subject(self):
         if len(self.subjects_list.selectedItems()) > 0:

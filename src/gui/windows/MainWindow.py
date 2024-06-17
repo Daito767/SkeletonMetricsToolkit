@@ -4,7 +4,7 @@ Created on June 2024
 
 @author: Ghimciuc Mihail
 """
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QAction, QFont
 from PySide6.QtWidgets import QMainWindow, QTextEdit, QToolBar, QWidget, QStackedWidget, QComboBox, QLabel, QListWidget, \
     QPushButton, QHBoxLayout, QVBoxLayout, QAbstractItemView
@@ -60,14 +60,14 @@ class MainWindow(QMainWindow):
         self.setup_ui()
 
     def build(self):
-        pass
+        self.setFixedSize(QSize(800, 600))
 
     def setup_ui(self):
         self.setWindowTitle(self.config['window']['title'])
         self.setGeometry(100, 100, self.config['window']['width'], self.config['window']['height'])
 
         # Set up status bar
-        self.statusBar().showMessage('Ready')
+        self.statusBar().showMessage('Ready', 3000)
 
     def switch_interface(self, index):
         self.stacked_widget.setCurrentIndex(index)
