@@ -43,7 +43,7 @@ class ExportManager:
             with PdfPages(file_path) as pdf:
                 for variable_name in data_to_export:
                     data = storage.get(variable_name)
-                    if data is None or not isinstance(data, (list, pd.Series)):
+                    if data is None or not isinstance(data, (list, pd.Series, np.ndarray)):
                         self.logger.error(f"Variable '{variable_name}' is not suitable for plotting or does not exist.")
                         continue
 
