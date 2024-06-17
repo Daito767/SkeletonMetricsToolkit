@@ -10,18 +10,21 @@ from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QDialog, QVBoxLayout, QLabel, QListWidget, QPushButton, QComboBox, \
     QTextEdit, QLineEdit, QHBoxLayout, QSpacerItem, QSizePolicy
-from calculations.operation import OperationManager
+from calculations.operation import OperationManager, Operation
 from calculations.vicon_nexus import ViconNexusAPI, Marker
 import logging
 import inspect
 
 
 class CreateOperationDialog(QDialog):
+    operation_added = Signal()
+
     def __init__(self, parent_widget: QWidget, logger: logging.Logger, operation_manager: OperationManager, parent=None):
         self.logger: logging.Logger = logger
         self.logger.info("Initializing CreateOperation Dialog")
         self.operation_manager: OperationManager = operation_manager
         self.markers: dict[str, Marker] = {}
+        self.operation_function: FunctionType
 
         super().__init__(parent)  # Initialize QDialog
 
@@ -41,9 +44,11 @@ class CreateOperationDialog(QDialog):
         self.parameter_dropdowns: list[QComboBox] = []
 
         self.result_name_label: QLabel = QLabel("Result Name:")
-        self.line_edit: QLineEdit = QLineEdit(self)
+        self.line_edit_result_name: QLineEdit = QLineEdit(self)
 
-        self.add_operation_button: QPushButton = QPushButton("Add")
+        self.layout_button_add: QHBoxLayout = QHBoxLayout()
+        self.button_add_operation: QPushButton = QPushButton("Add")
+        self.button_add_run_operation: QPushButton = QPushButton("Add and Run")
 
         self.build()
         self.setup_ui()
@@ -51,7 +56,8 @@ class CreateOperationDialog(QDialog):
     def build(self):
         self.dropdown_menu.currentIndexChanged.connect(self.update_interface)
         self.dropdown_menu.addItems(self.operation_manager.available_functions.keys())
-        self.add_operation_button.clicked.connect(self.add_operation)
+        self.button_add_operation.clicked.connect(self.add_operation)
+        self.button_add_run_operation.clicked.connect(self.add_run_operation)
 
     def setup_ui(self):
         self.setWindowTitle("Create Operation")
@@ -72,11 +78,13 @@ class CreateOperationDialog(QDialog):
         self.layout.addLayout(self.dynamic_layout)
 
         self.result_name_label.setFont(QFont('Arial', 11))
-        self.line_edit.setFont(QFont('Arial', 11))
+        self.line_edit_result_name.setFont(QFont('Arial', 11))
         self.row_line_edit.addWidget(self.result_name_label)
-        self.row_line_edit.addWidget(self.line_edit)
+        self.row_line_edit.addWidget(self.line_edit_result_name)
 
-        self.layout.addWidget(self.add_operation_button)
+        self.layout_button_add.addWidget(self.button_add_operation)
+        self.layout_button_add.addWidget(self.button_add_run_operation)
+        self.layout.addLayout(self.layout_button_add)
 
         self.setLayout(self.layout)
 
@@ -86,25 +94,80 @@ class CreateOperationDialog(QDialog):
             operation_description = self.operation_manager.available_functions[operation_name]
             self.operation_description_label.setText(operation_description.__doc__)
             self.update_dynamic_layout()
+            self.adjustSize()
+
+    def remove_last_hbox(self):
+        while self.dynamic_layout.count():
+            item = self.dynamic_layout.itemAt(self.dynamic_layout.count() - 1)
+
+            if item.layout():
+                layout = item.layout()
+
+                while layout.count():
+                    widget_item = layout.itemAt(0)
+                    widget = widget_item.widget()
+                    if widget:
+                        layout.removeWidget(widget)
+                        widget.deleteLater()
+                    else:
+                        sub_layout = widget_item.layout()
+                        self._clear_layout(sub_layout)
+                        layout.removeItem(widget_item)
+
+                # Remove the layout itself
+                self.dynamic_layout.removeItem(layout)
+                del layout
+
+    def _clear_layout(self, layout):
+        while layout.count():
+            item = layout.itemAt(0)
+            widget = item.widget()
+            if widget:
+                layout.removeWidget(widget)
+                widget.deleteLater()
+            else:
+                sub_layout = item.layout()
+                self._clear_layout(sub_layout)
+                layout.removeItem(item)
 
     def update_dynamic_layout(self):
         self.parameter_dropdowns.clear()
-        for i in reversed(range(self.dynamic_layout.count())):
-            widget_to_remove = self.dynamic_layout.itemAt(i).widget()
-            self.dynamic_layout.removeWidget(widget_to_remove)
-            widget_to_remove.setParent(None)
+        self.remove_last_hbox()
 
-        func: FunctionType = self.operation_manager.available_functions[self.dropdown_menu.currentText()]
-        params = inspect.getfullargspec(func).args
+        self.operation_function = self.operation_manager.available_functions[self.dropdown_menu.currentText()]
+        params = inspect.getfullargspec(self.operation_function).args
 
         for param in params:
+            row_layout: QHBoxLayout = QHBoxLayout()
+            label: QLabel = QLabel(f"{param}:")
             dropdown: QComboBox = QComboBox()
             dropdown.addItems(self.markers)
+            row_layout.addWidget(label)
+            row_layout.addWidget(dropdown)
             self.parameter_dropdowns.append(dropdown)
-            self.dynamic_layout.addWidget(dropdown)
+            self.dynamic_layout.addLayout(row_layout)
+
+    def create_operation(self) -> Operation | None:
+        result_name: str = self.line_edit_result_name.text()
+        params: list[str] = [x.currentText() for x in self.parameter_dropdowns]
+        if result_name not in self.markers:
+            operation: Operation = Operation(self.operation_function, result_name, params)
+            return operation
+        return None
 
     def add_operation(self):
-        pass
+        operation: Operation = self.create_operation()
+        if operation:
+            self.operation_manager.add_operation(operation)
+            self.on_operation_added()
+            self.close()
+
+    def add_run_operation(self):
+        operation: Operation = self.create_operation()
+        if operation:
+            self.operation_manager.add_and_run_operation(operation)
+            self.on_operation_added()
+            self.close()
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -112,7 +175,11 @@ class CreateOperationDialog(QDialog):
 
     def run_on_show(self):
         self.update_interface()
-        self.line_edit.setText("")
+        self.line_edit_result_name.setText("")
+
+    @Slot()
+    def on_operation_added(self):
+        self.operation_added.emit()
 
     @Slot('QVariant')
     def update_markers(self, markers: dict[str, Marker]):
