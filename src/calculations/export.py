@@ -19,14 +19,23 @@ class ExportManager:
     def export_excel(self, storage: dict[str, any], data_to_export: list[str], file_path: str):
         try:
             # Filtrare date pentru variabilele specificate
-            filtered_storage = {key: storage[key] for key in data_to_export if key in storage}
+            filtered_storage = {key: storage[key] for key in variable_names if key in storage}
+
+            # Transformarea datelor într-un format corespunzător pentru Excel
+            for key, value in filtered_storage.items():
+                if isinstance(value, list) and all(isinstance(i, list) for i in value):
+                    # Dacă este o listă de liste, transformăm fiecare listă într-un șir de caractere
+                    filtered_storage[key] = [', '.join(map(str, sublist)) for sublist in value]
+
             df = pd.DataFrame(filtered_storage)
             df.to_excel(file_path, index=False)
             self.logger.info(f"Data exported to {file_path} successfully.")
+            return True
         except Exception as e:
             self.logger.error(f"Failed to export data to Excel: {e}")
+            return False
 
-    def export_plot(self, storage: dict[str, any], data_to_export: list[str], file_path: str):
+    def export_plot(self, storage: dict[str, any], data_to_export: list[str], file_path: str) -> bool:
         try:
             with PdfPages(file_path) as pdf:
                 for variable_name in data_to_export:
@@ -43,9 +52,12 @@ class ExportManager:
                     pdf.savefig()
                     plt.close()
                     self.logger.info(f"Plot of '{variable_name}' added to PDF.")
+
             self.logger.info(f"PDF with plots saved to {file_path} successfully.")
+            return True
         except Exception as e:
             self.logger.error(f"Failed to save PDF: {e}")
+            return False
 
 
 if __name__ == "__main__":
