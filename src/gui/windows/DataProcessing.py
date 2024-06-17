@@ -151,14 +151,14 @@ class DataProcessing(QWidget):
 
     def export_to_excel(self):
         variables: list[str] = [item.text() for item in self.variables_list.selectedItems()]
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.excel)")
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.xlsx)")
         if file_path:
             result = self.export_manager.export_excel(self.operation_manager.storage, variables, file_path)
             self.export_operation_result(result)
 
     def export_to_plot(self):
         variables: list[str] = [item.text() for item in self.variables_list.selectedItems()]
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.excel)")
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.pdf)")
         if file_path:
             result = self.export_manager.export_plot(self.operation_manager.storage, variables, file_path)
             self.export_operation_result(result)

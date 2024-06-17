@@ -22,12 +22,15 @@ class ExportManager:
             filtered_storage = {key: storage[key] for key in data_to_export if key in storage}
 
             # Transformarea datelor într-un format corespunzător pentru Excel
+            flattened_storage = {}
             for key, value in filtered_storage.items():
-                if isinstance(value, (list, np.ndarray)) and all(isinstance(i, list) for i in value):
-                    # Dacă este o listă de liste, transformăm fiecare listă într-un șir de caractere
-                    filtered_storage[key] = [', '.join(map(str, sublist)) for sublist in value]
+                if isinstance(value, (list, np.ndarray)) and all(isinstance(i, (list, np.ndarray)) for i in value):
+                    # Dacă este o listă de liste sau ndarray, transformăm fiecare listă/ndarray într-un șir de caractere
+                    flattened_storage[key] = [', '.join(map(str, sublist)) for sublist in value]
+                else:
+                    flattened_storage[key] = value
 
-            df = pd.DataFrame(filtered_storage)
+            df = pd.DataFrame(flattened_storage)
             df.to_excel(file_path, index=False)
             self.logger.info(f"Data exported to {file_path} successfully.")
             return True
