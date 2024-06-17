@@ -60,6 +60,18 @@ class OperationManager:
         self._operations.append(operation)
         self.logger.info(f"Operation added: {operation}")
 
+    def add_and_run_operation(self, operation: Operation) -> None:
+        self._operations.append(operation)
+        self.logger.info(f"Operation added: {operation}")
+
+        self.logger.info(f"Executing operation: {operation}")
+        operation.errors.clear()
+        success = operation.execute(self.storage)
+        if success:
+            self.logger.info(f"Operation successful: {operation}")
+        else:
+            self.logger.error(f"Operation failed: {operation}. Errors: {operation.errors}")
+
     def remove_operation(self, operation: Operation) -> None:
         if operation in self._operations:
             self._operations.remove(operation)
