@@ -7,9 +7,10 @@ Created on June 2024
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel, QListWidget, QPushButton, QHBoxLayout, \
-    QAbstractItemView, QMessageBox, QDialog
+    QAbstractItemView, QMessageBox, QDialog, QFileDialog
 import logging
 import gui.windows.CreateOperationDialog as Dialogs
+from calculations.export import ExportManager
 from calculations.operation import OperationManager
 from calculations.vicon_nexus import ViconNexusAPI, Marker
 
@@ -34,6 +35,7 @@ class DataProcessing(QWidget):
 
         self.nexus_api: ViconNexusAPI = nexus_api
         self.operation_manager: OperationManager = operation_manager
+        self.export_manager: ExportManager = ExportManager(self.logger)
 
         self.layout: QVBoxLayout = QVBoxLayout()
         self.label: QLabel = QLabel("Data Processing")
@@ -51,17 +53,20 @@ class DataProcessing(QWidget):
 
         self.dialog_create_operation = Dialogs.CreateOperationDialog(self, self.logger, self.operation_manager)
 
-        self.button_next: QPushButton = QPushButton("Next", self)
+        self.button_export_excel: QPushButton = QPushButton("Export to Excel", self)
+        self.button_export_plot: QPushButton = QPushButton("Export to PLOT", self)
 
         self.build()
         self.setup_ui()
 
     def build(self):
         self.button_add_operation.clicked.connect(self.show_dialog)
-        self.button_next.clicked.connect(self.next_widget)
 
         self.markers_changed.connect(self.dialog_create_operation.update_markers)
         self.dialog_create_operation.operation_added.connect(self.refresh_list_elements)
+
+        self.button_export_excel.clicked.connect(self.export_to_excel)
+        self.button_export_plot.clicked.connect(self.export_to_plot)
 
         self.update_variables()
         self.update_operations()
@@ -111,14 +116,22 @@ class DataProcessing(QWidget):
         self.column_layout.addLayout(self.column_2_layout)
         self.layout.addLayout(self.column_layout)
 
-        self.button_next.setFont(QFont('Arial', 11))
-        self.button_next.setStyleSheet("""
+        self.button_export_excel.setFont(QFont('Arial', 11))
+        self.button_export_excel.setStyleSheet("""
                     QPushButton {
-                        margin: 10px 100px 10px 500px ;   /* Margin around the button */
-                        padding: 10px;  /* Padding inside the button */
+                        margin: 0px 50px 0px 50px ;   /* Margin around the button */
+                        padding: 5px;  /* Padding inside the button */
                     }
                 """)
-        self.layout.addWidget(self.button_next)
+        self.button_export_plot.setFont(QFont('Arial', 11))
+        self.button_export_plot.setStyleSheet("""
+                    QPushButton {
+                        margin: 0px 50px 0px 50px ;   /* Margin around the button */
+                        padding: 5px;  /* Padding inside the button */
+                    }
+                """)
+        self.column_1_layout.addWidget(self.button_export_excel)
+        self.column_1_layout.addWidget(self.button_export_plot)
         self.setLayout(self.layout)
 
     def show_dialog(self):
@@ -135,6 +148,26 @@ class DataProcessing(QWidget):
 
     def get_markers(self) -> dict[str, Marker]:
         return self.markers
+
+    def export_to_excel(self):
+        variables: list[str] = [item.text() for item in self.variables_list.selectedItems()]
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.excel)")
+        if file_path:
+            result = self.export_manager.export_excel(self.operation_manager.storage, variables, file_path)
+            self.export_operation_result(result)
+
+    def export_to_plot(self):
+        variables: list[str] = [item.text() for item in self.variables_list.selectedItems()]
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.excel)")
+        if file_path:
+            result = self.export_manager.export_plot(self.operation_manager.storage, variables, file_path)
+            self.export_operation_result(result)
+
+    def export_operation_result(self, result):
+        if result:
+            self.main_window.statusBar().showMessage("Exported Successfully!", 3000)
+        else:
+            self.main_window.statusBar().showMessage("Exported Failed!", 3000)
 
     @Slot()
     def refresh_list_elements(self):
